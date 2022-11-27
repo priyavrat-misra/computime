@@ -14,15 +14,6 @@ class chatbot():
         r = requests.get(url)
         return json.loads(r.content)
 
-    def computime(self, time):
-        '''
-        converts time in seconds to time in hours, minutes and seconds
-        '''
-        h = int(time / 3600)
-        m = int((time - h * 3600) / 60)
-        s = time - h * 3600 - m * 60
-        return h, m, s
-
     def send_message(self, msg, chat_id):
         url = self.base_url + f"sendMessage?chat_id={chat_id}&text={msg}&parse_mode=HTML&disable_web_page_preview=True"
         if msg is not None:
