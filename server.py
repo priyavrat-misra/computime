@@ -1,3 +1,4 @@
+import time
 from bot import chatbot
 
 bot = chatbot("./config.cfg")
@@ -7,31 +8,26 @@ def make_reply(msg):
         return 'Send messages with the format:\u000a'\
                 '<code>hrs:mins:secs speed</code>\u000a'\
                 '<i>E.g., 3:15:53 2.75</i>\u000a\u000a'\
-                '<a href="tg://user?id=1766203429">Author</a> • '\
-                '<a href="https://github.com/priyavrat-misra/computime">Code</a>'
+                'by @prv_t • '\
+                '<a href="https://github.com/priyavrat-misra/computime">Source code</a>'
     try:
         dur, speed = msg.split()
         speed = float(speed)
         h, m, s = tuple(int(x) for x in dur.split(':'))
-        t1 = (h * 3600 + m * 60 + s)
+        t1 = ((h % 24) * 3600 + m * 60 + s)
         t2 = t1 - (t1 / speed)
         t1 /= speed
-        h, m, s = computime(t1)
-        msg = f"<b>{dur}</b> @ <b>{speed}x</b> will take <b>{h}:{m}:{s:.2f}</b>"
-        h, m, s = computime(t2)
-        msg += f" and save <b>{h}:{m}:{s:.2f}</b>"
+        msg = f"<b>{dur}</b> @ <b>{speed}x</b> will take <b>{computime(t1)}</b>"
+        msg += f" and save <b>{computime(t2)}</b>"
         return msg
     except:
         return "Invalid format."
 
-def computime(time):
+def computime(secs):
     '''
     converts time in seconds to time in hours, minutes and seconds
     '''
-    h = int(time / 3600)
-    m = int((time - h * 3600) / 60)
-    s = time - h * 3600 - m * 60
-    return h, m, s
+    return time.strftime("%H:%M:%S", time.gmtime(secs))
 
 update_id = None
 while True:
