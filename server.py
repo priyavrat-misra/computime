@@ -4,12 +4,12 @@ from bot import chatbot
 bot = chatbot("./config.cfg")
 
 def make_reply(msg):
+    usage = 'Send messages in this format:\u000a'\
+            '<code>hrs:mins:secs speed</code>\u000a'\
+            '<i>E.g., 3:15:53 2.75</i>\u000a\u000a'
+
     if msg == "/start":
-        return 'Send messages with the format:\u000a'\
-                '<code>hrs:mins:secs speed</code>\u000a'\
-                '<i>E.g., 3:15:53 2.75</i>\u000a\u000a'\
-                'by @prv_t • '\
-                '<a href="https://github.com/priyavrat-misra/computime">Source code</a>'
+        return usage + 'by @prv_t • <a href="https://github.com/priyavrat-misra/computime">Source code</a>'
     try:
         dur, speed = msg.split()
         speed = float(speed)
@@ -21,7 +21,8 @@ def make_reply(msg):
         msg += f" and save <b>{computime(t2)}</b>"
         return msg
     except:
-        return "Invalid format."
+        return 'Invalid input.\u000a\u000a' + usage + \
+                'Bug? Please report it <a href="https://github.com/priyavrat-misra/computime/issues">here</a>.'
 
 def computime(secs):
     '''
