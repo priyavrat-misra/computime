@@ -14,9 +14,9 @@ def make_reply(msg):
         dur, speed = msg.split()
         speed = float(speed)
         h, m, s = tuple(int(x) for x in dur.split(':'))
-        t1 = ((h % 24) * 3600 + m * 60 + s)
-        t2 = t1 - (t1 / speed)
-        t1 /= speed
+        t1 = t2 = (h % 24) * 3600 + m * 60 + s
+        t1 //= speed
+        t2 -= t1
         msg = f"<b>{dur}</b> @ <b>{speed}x</b> will take <b>{computime(t1)}</b>"
         msg += f" and save <b>{computime(t2)}</b>"
         return msg
