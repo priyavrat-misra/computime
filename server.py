@@ -35,6 +35,8 @@ while True:
     if updates:
         for item in updates:
             update_id = item['update_id']
+            if 'message' not in item:
+                continue
             try:
                 message = item['message']['text']
             except:
