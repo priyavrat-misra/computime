@@ -1,4 +1,4 @@
-import time
+import datetime
 from bot import chatbot
 
 bot = chatbot('./config.cfg')
@@ -16,12 +16,12 @@ def make_reply(msg):
         dur, speed = msg.split()
         speed = float(speed)
         h, m, s = tuple(int(x) for x in dur.split(':'))
-        t1 = t2 = (h % 24) * 3600 + m * 60 + s
-        t1 //= speed
+        t1 = t2 = h * 3600 + m * 60 + s
+        t1 /= speed
         t2 -= t1
         return (f'<b>{dur}</b> @ <b>{speed}x</b>'
-               f' will take <b>{time.strftime("%H:%M:%S", time.gmtime(t1))}</b>'
-               f' and save <b>{"nothing." if speed <= 1 else time.strftime("%H:%M:%S", time.gmtime(t2))}</b>')
+               f' will take <b>{datetime.timedelta(seconds=t1)}</b>'
+               f' and save <b>{"nothing." if speed <= 1 else datetime.timedelta(seconds=t2)}</b>')
     except:
         return ('Invalid input.\u000a\u000a'
                 f'{usage}'
