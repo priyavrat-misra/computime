@@ -30,15 +30,19 @@ bot = chatbot()
 
 usage_text = (
     "Send messages in one of these formats:\u000a"
-    "• <code>h:m:s speed</code>\u000a"
+    "• <code>H:M:S speed</code> <i>(e.g., 3:15:53 2.75)</i>\u000a"
     "• <code>YouTubeVideoURL speed</code>\u000a"
-    "<i>E.g., 3:15:53 2.75</i>\u000a\u000a"
+    "• <code>YouTubePlaylistURL speed</code>\u000a\u000a"
 )
 bug_text = 'Bug? Report it <a href="https://github.com/priyavrat-misra/computime/issues">here</a>.'
 
-dur_pattern = re.compile("^[0-9]+:[0-9]+:[0-9]+$")
-video_id = re.compile(r"(?<=[=\/&])[a-zA-Z0-9_\-]{11}(?=[=\/&?#\n\r]|$)")
-ytv_url = f'https://www.googleapis.com/youtube/v3/videos?part=contentDetails&key={os.getenv("YT")}&id='
+dur_pattern = re.compile(r"^[0-9]+:[0-9]+:[0-9]+$")
+vd_pattern = re.compile(r"(?<=[=\/&])[a-zA-Z0-9_\-]{11}(?=[=\/&?#\n\r]|$)")
+pl_pattern = re.compile(r"^([\S]+list=)?([\w_-]+)[\S]*$")
+
+yt_api = os.getenv("YT")
+ytvd_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&fields=items/contentDetails/duration&key={yt_api}&id="
+ytpl_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&fields=items/contentDetails/videoId,nextPageToken&key={yt_api}&playlistId="
 
 
 def make_reply(msg):
@@ -57,9 +61,27 @@ def make_reply(msg):
         if dur_pattern.match(msg):
             h, m, s = tuple(int(x) for x in msg.split(":"))
             dur = datetime.timedelta(hours=h, minutes=m, seconds=s)
+        elif "list" in msg:
+            reply = "The playlist"
+            pl_id = pl_pattern.match(msg).group(2)
+            next_page_token = ""
+            while True:
+                vd_list = []
+                page = requests.get(
+                    f"{ytpl_url}{pl_id}&pageToken={next_page_token}"
+                ).json()
+                for vd in page["items"]:
+                    vd_list.append(vd["contentDetails"]["videoId"])
+                r = requests.get(f"{ytvd_url}{','.join(vd_list)}").json()
+                for vd in r["items"]:
+                    dur += isodate.parse_duration(vd["contentDetails"]["duration"])
+                if "nextPageToken" in page:
+                    next_page_token = page["nextPageToken"]
+                else:
+                    break
         else:
             reply = "The video"
-            r = requests.get(f"{ytv_url}{video_id.search(msg).group()}").json()
+            r = requests.get(f"{ytvd_url}{vd_pattern.search(msg).group()}").json()
             dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
     except:
         return f"Invalid duration or URL.\u000a\u000a{usage_text}{bug_text}"
@@ -87,4 +109,3 @@ while True:
             from_ = item["message"]["from"]["id"]
             reply = make_reply(message)
             bot.send_message(reply, from_)
-
