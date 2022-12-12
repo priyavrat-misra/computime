@@ -1,7 +1,7 @@
 import datetime
 from bot import chatbot
 
-bot = chatbot('./config.cfg')
+bot = chatbot()
 
 def make_reply(msg):
     usage = ('Send messages in this format:\u000a'
