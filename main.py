@@ -13,8 +13,7 @@ class chatbot:
         url = self.tg_url + "getUpdates?timeout=100"
         if offset:
             url += f"&offset={offset + 1}"
-        r = requests.get(url)
-        return r.json()
+        return requests.get(url).json()
 
     def send_message(self, msg, chat_id):
         url = (
@@ -22,8 +21,7 @@ class chatbot:
             f"sendMessage?chat_id={chat_id}&text={msg}"
             f"&parse_mode=HTML&disable_web_page_preview=True"
         )
-        if msg is not None:
-            requests.get(url)
+        requests.get(url)
 
 
 bot = chatbot()
