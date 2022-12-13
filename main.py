@@ -58,12 +58,19 @@ def make_reply(msg):
         speed = float(speed)
         reply = msg
         dur = datetime.timedelta(0)
+        
+        vd_exists = vd_pattern.search(msg)
+        pl_exists = pl_pattern.match(msg) if vd_exists is None else None
         if dur_pattern.match(msg):
             h, m, s = tuple(int(x) for x in msg.split(":"))
             dur = datetime.timedelta(hours=h, minutes=m, seconds=s)
-        elif "list" in msg:
+        elif vd_exists:
+            reply = "The video"
+            r = requests.get(f"{ytvd_url}{vd_exists.group()}").json()
+            dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
+        elif pl_exists:
             reply = "The playlist"
-            pl_id = pl_pattern.match(msg).group(2)
+            pl_id = pl_exists.group(2)
             next_page_token = ""
             while True:
                 vd_list = []
@@ -80,9 +87,7 @@ def make_reply(msg):
                 else:
                     break
         else:
-            reply = "The video"
-            r = requests.get(f"{ytvd_url}{vd_pattern.search(msg).group()}").json()
-            dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
+            raise Exception
     except:
         return f"Invalid duration or URL.\u000a\u000a{usage_text}{bug_text}"
 
