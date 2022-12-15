@@ -54,20 +54,20 @@ def make_reply(msg):
     try:
         msg, speed = msg.split()
         speed = float(speed)
-        reply = msg
         dur = datetime.timedelta(0)
-        
+
         vd_exists = vd_pattern.search(msg)
         pl_exists = pl_pattern.match(msg) if vd_exists is None else None
         if dur_pattern.match(msg):
             h, m, s = tuple(int(x) for x in msg.split(":"))
             dur = datetime.timedelta(hours=h, minutes=m, seconds=s)
+            msg = f"<b>{dur}</b>"
         elif vd_exists:
-            reply = "The video"
+            msg = f'<a href="{msg}">This video</a>'
             r = requests.get(f"{ytvd_url}{vd_exists.group()}").json()
             dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
         elif pl_exists:
-            reply = "The playlist"
+            msg = f'<a href="{msg}">This playlist</a>'
             pl_id = pl_exists.group(2)
             next_page_token = ""
             while True:
@@ -90,9 +90,8 @@ def make_reply(msg):
         return f"Invalid duration or URL.\u000a\u000a{usage_text}{bug_text}"
 
     result_dur = dur / speed
-    return (
-        f"{reply} @ {speed}x will take <b>{result_dur}</b>"
-        f' and save <b>{"nothing." if speed <= 1 else dur - result_dur}</b>'
+    return f'{msg} @ <b>{speed}x</b> will take <b>{result_dur}</b>' + (
+        f" and save <b>{dur - result_dur}</b>" if speed > 1 else ""
     )
 
 
