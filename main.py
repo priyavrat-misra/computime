@@ -1,8 +1,8 @@
 import os
 import requests
 import re
-import datetime
 import isodate
+from datetime import timedelta
 
 
 class chatbot:
@@ -64,13 +64,13 @@ def make_reply(msg):
             speeds = map(float, params)
         else:
             speeds = [1, 1.25, 1.5, 1.75, 2]
-        dur = datetime.timedelta(0)
+        dur = timedelta(0)
 
         vd_exists = vd_pattern.search(msg)
         pl_exists = pl_pattern.match(msg) if vd_exists is None else None
         if dur_pattern.match(msg):
             h, m, s = tuple(int(x) for x in msg.split(":"))
-            dur = datetime.timedelta(hours=h, minutes=m, seconds=s)
+            dur = timedelta(hours=h, minutes=m, seconds=s)
             msg = f"<b>{dur}</b>\u000a"
         elif vd_exists:
             msg = f'<a href="{msg}">This video</a>\u000a'
@@ -98,7 +98,9 @@ def make_reply(msg):
             raise Exception
 
         for speed in speeds:
-            msg += f"@ <b>{speed:.2f}x</b> = <b>{dur / speed}</b>\u000a"
+            result_dur = dur / speed
+            result_dur -= timedelta(microseconds=result_dur.microseconds)
+            msg += f"@ <b>{speed:.2f}x</b> = <b>{result_dur}</b>\u000a"
     except:
         return f"Invalid format.\u000a\u000a{usage_text}{bug_text}"
     
