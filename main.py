@@ -28,11 +28,13 @@ bot = chatbot()
 
 usage_text = (
     "Send messages in one of these formats:\u000a"
-    "• <code>H:M:S speed</code> <i>(e.g., 3:15:53 2.75)</i>\u000a"
-    "• <code>YouTubeVideoURL</code>\u000a"
-    "• <code>YouTubePlaylistURL</code>\u000a\u000a"
-    "• <code>YouTubeVideoURL speed</code>\u000a"
-    "• <code>YouTubePlaylistURL speed</code>\u000a\u000a"
+    "• <code>H:M:S [speed...]</code>\u000a"
+    "• <code>YouTube_Video/Playlist_URL [speed...]</code>\u000a"
+    "<i>Note:</i> <code>speed(s)</code> is/are optional.\u000a\u000a"
+    "<b>Examples:</b>\u000a"
+    "• 3:15:53 2.75 2.3 3\u000a"
+    "• https://www.youtube.com/playlist?list=PLCiNIjl_KpQhFwQA3G19w1nmhEOlZQsGF\u000a"
+    "• https://www.youtube.com/watch?v=dQw4w9WgXcQ 1.6 3.1\u000a\u000a"
 )
 bug_text = 'Bug? Report it <a href="https://github.com/priyavrat-misra/computime/issues">here</a>.'
 
@@ -55,9 +57,13 @@ def make_reply(msg):
 
     try:
         speed = 1.0
-        if ' ' in msg:
-            msg, speed = msg.split()
-            speed = float(speed)
+        params = msg.split()
+        msg = params.pop(0)
+        speeds = []
+        if len(params):
+            speeds = map(float, params)
+        else:
+            speeds = [1, 1.25, 1.5, 1.75, 2]
         dur = datetime.timedelta(0)
 
         vd_exists = vd_pattern.search(msg)
@@ -65,13 +71,13 @@ def make_reply(msg):
         if dur_pattern.match(msg):
             h, m, s = tuple(int(x) for x in msg.split(":"))
             dur = datetime.timedelta(hours=h, minutes=m, seconds=s)
-            msg = f"<b>{dur}</b>"
+            msg = f"<b>{dur}</b>\u000a"
         elif vd_exists:
-            msg = f'<a href="{msg}">This video</a>'
+            msg = f'<a href="{msg}">This video</a>\u000a'
             r = requests.get(f"{ytvd_url}{vd_exists.group()}").json()
             dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
         elif pl_exists:
-            msg = f'<a href="{msg}">This playlist</a>'
+            msg = f'<a href="{msg}">This playlist</a>\u000a'
             pl_id = pl_exists.group(2)
             next_page_token = ""
             while True:
@@ -90,13 +96,13 @@ def make_reply(msg):
                     break
         else:
             raise Exception
-    except:
-        return f"Invalid duration or URL.\u000a\u000a{usage_text}{bug_text}"
 
-    result_dur = dur / speed
-    return f'{msg} @ <b>{speed}x</b> will take <b>{result_dur}</b>' + (
-        f" and save <b>{dur - result_dur}</b>" if speed > 1 else ""
-    )
+        for speed in speeds:
+            msg += f"@ <b>{speed:.2f}x</b> = <b>{dur / speed}</b>\u000a"
+    except:
+        return f"Invalid format.\u000a\u000a{usage_text}{bug_text}"
+    
+    return msg
 
 
 update_id = None
