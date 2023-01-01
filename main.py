@@ -29,6 +29,8 @@ bot = chatbot()
 usage_text = (
     "Send messages in one of these formats:\u000a"
     "• <code>H:M:S speed</code> <i>(e.g., 3:15:53 2.75)</i>\u000a"
+    "• <code>YouTubeVideoURL</code>\u000a"
+    "• <code>YouTubePlaylistURL</code>\u000a\u000a"
     "• <code>YouTubeVideoURL speed</code>\u000a"
     "• <code>YouTubePlaylistURL speed</code>\u000a\u000a"
 )
@@ -52,8 +54,10 @@ def make_reply(msg):
         )
 
     try:
-        msg, speed = msg.split()
-        speed = float(speed)
+        speed = 1.0
+        if ' ' in msg:
+            msg, speed = msg.split()
+            speed = float(speed)
         dur = datetime.timedelta(0)
 
         vd_exists = vd_pattern.search(msg)
