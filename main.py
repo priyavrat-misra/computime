@@ -51,7 +51,7 @@ def make_reply(msg):
     if msg == "/start" or msg == "/help":
         return (
             f"{usage_text}"
-            "Bot by @prv_t • "
+            "Bot by priyavr.at [@prv_t] • "
             '<a href="https://github.com/priyavrat-misra/computime">Source code</a>'
         )
 
@@ -64,8 +64,8 @@ def make_reply(msg):
             speeds = map(float, params)
         else:
             speeds = [1, 1.25, 1.5, 1.75, 2]
+          
         dur = timedelta(0)
-
         vd_exists = vd_pattern.search(msg)
         pl_exists = pl_pattern.match(msg) if vd_exists is None else None
         if dur_pattern.match(msg):
@@ -73,12 +73,13 @@ def make_reply(msg):
             dur = timedelta(hours=h, minutes=m, seconds=s)
             msg = f"<b>{dur}</b>\u000a"
         elif vd_exists:
-            msg = f'<a href="{msg}">This video</a>\u000a'
-            r = requests.get(f"{ytvd_url}{vd_exists.group()}").json()
+            vd_id = vd_exists.group()
+            msg = f'<a href="https://youtu.be/{vd_id}">This video</a>\u000a'
+            r = requests.get(f"{ytvd_url}{vd_id}").json()
             dur = isodate.parse_duration(r["items"][0]["contentDetails"]["duration"])
         elif pl_exists:
-            msg = f'<a href="{msg}">This playlist</a>\u000a'
             pl_id = pl_exists.group(2)
+            msg = f'<a href="{msg}">This playlist</a>\u000a'
             next_page_token = ""
             while True:
                 vd_list = []
@@ -100,7 +101,7 @@ def make_reply(msg):
         for speed in speeds:
             result_dur = dur / speed
             result_dur -= timedelta(microseconds=result_dur.microseconds)
-            msg += f"@ <b>{speed:.2f}x</b> = <b>{result_dur}</b>\u000a"
+            msg += f"@ <b>{speed:.2f}x = {result_dur}</b>\u000a"
     except:
         return f"Invalid format.\u000a\u000a{usage_text}{bug_text}"
     
