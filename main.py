@@ -42,21 +42,19 @@ dur_pattern = re.compile(r"^[0-9]+:[0-9]+:[0-9]+$")
 vd_pattern = re.compile(r"(?<=[=\/&])[a-zA-Z0-9_\-]{11}(?=[=\/&?#\n\r]|$)")
 pl_pattern = re.compile(r"^([\S]+list=)?([\w_-]+)[\S]*$")
 
-yt_api = os.getenv("YT")
-ytvd_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&fields=items/contentDetails/duration&key={yt_api}&id="
-ytpl_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&fields=items/contentDetails/videoId,nextPageToken&key={yt_api}&playlistId="
+ytvd_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&fields=items/contentDetails/duration&key={os.getenv('YT')}&id="
+ytpl_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&fields=items/contentDetails/videoId,nextPageToken&key={os.getenv('YT')}&playlistId="
 
 
 def make_reply(msg):
     if msg == "/start" or msg == "/help":
         return (
             f"{usage_text}"
-            "Bot by priyavr.at [@prv_t] • "
+            "Bot by priyavr.at (@prv_t) • "
             '<a href="https://github.com/priyavrat-misra/computime">Source code</a>'
         )
 
     try:
-        speed = 1.0
         params = msg.split()
         msg = params.pop(0)
         speeds = []
@@ -103,7 +101,7 @@ def make_reply(msg):
             result_dur -= timedelta(microseconds=result_dur.microseconds)
             msg += f"@ <b>{speed:.2f}x = {result_dur}</b>\u000a"
     except:
-        return f"Invalid format.\u000a\u000a{usage_text}{bug_text}"
+        return f"Invalid format/URL.\u000a\u000a{usage_text}{bug_text}"
     
     return msg
 
