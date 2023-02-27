@@ -51,7 +51,8 @@ def make_reply(msg):
         return (
             f"{usage_text}"
             "Bot by priyavr.at (@prv_t) • "
-            '<a href="https://github.com/priyavrat-misra/computime">Source code</a>'
+            '<a href="https://github.com/priyavrat-misra/computime">Source code</a>\u000a'
+            '<tg-spoiler><i>If you found the bot helpful, leave it a \u2605 :)</i></tg-spoiler>'
         )
 
     try:
